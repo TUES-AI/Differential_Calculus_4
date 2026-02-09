@@ -1,1 +1,272 @@
-falksdhfajkdsfh
+% !TEX program = pdflatex
+\documentclass[11pt,a4paper]{article}
+
+% --- Български език (pdfLaTeX) ---
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[bulgarian]{babel}
+
+% --- Математика и форматиране ---
+\usepackage{amsmath, amssymb, mathtools}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{microtype}
+
+\geometry{margin=2.2cm}
+
+% --- Цветове: основа (червено) и аргумент (зелено) ---
+\definecolor{BaseRed}{RGB}{200,40,40}
+\definecolor{ArgGreen}{RGB}{20,140,60}
+
+\newcommand{\base}[1]{\textcolor{BaseRed}{#1}}
+\newcommand{\argu}[1]{\textcolor{ArgGreen}{#1}}
+
+% Логаритъм с оцветена основа и аргумент:
+% \logc{a}{x} -> \log_{a}(x), но a е червено, x е зелено
+\newcommand{\logc}[2]{\log_{\base{#1}}\!\left(\argu{#2}\right)}
+
+% Естествен логаритъм с оцветен аргумент (по желание):
+\newcommand{\lnc}[1]{\ln\!\left(\argu{#1}\right)}
+
+% Оцветена степен: \powc{a}{x} -> a^x, но a е червено (като "основа")
+\newcommand{\powc}[2]{\base{#1}^{#2}}
+
+% Оцветени “инверсни” тъждества (удобно за правила като a^{log_a(x)}=x):
+\newcommand{\invexp}[2]{\powc{#1}{\logc{#1}{#2}} = \argu{#2}}
+\newcommand{\invlog}[2]{\logc{#1}{\powc{#1}{#2}} = #2}
+
+% Малко по-“книжно” разстояние между редовете в таблици
+\renewcommand{\arraystretch}{1.6}
+\setlength{\tabcolsep}{10pt}
+
+\title{Експонента, логаритми, граници и производни\\\large (обобщение + основни правила)}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Цели и контекст}
+В този раздел обединяваме четири близко свързани теми, които постоянно се появяват и в
+машинното обучение:
+\begin{itemize}
+  \item \textbf{граници} (за да разбираме дефиниции и “стандартни” предели);
+  \item \textbf{производни} и \textbf{правила за диференциране} (за градиенти и оптимизация);
+  \item \textbf{експоненциална функция} $a^x$ и специалната основа $e$ (ключова в softmax, log-sum-exp, вероятности);
+  \item \textbf{логаритми} $\log_a x$ и естествен логаритъм $\ln x$ (ключови в log-loss, cross-entropy, стабилност).
+\end{itemize}
+
+\section{Бързо обобщение: граници}
+\subsection{Интуитивна идея}
+Записът $\lim\limits_{x\to x_0} f(x)=L$ означава:
+когато $x$ е достатъчно близо до $x_0$ (без да е задължително равно на $x_0$),
+стойностите на $f(x)$ стават достатъчно близки до $L$.
+
+\subsection{Основни правила}
+Ако съществуват $\lim\limits_{x\to x_0} f(x)$ и $\lim\limits_{x\to x_0} g(x)$, то:
+\[
+\lim_{x\to x_0}(f(x)+g(x))=\lim_{x\to x_0}f(x)+\lim_{x\to x_0}g(x),
+\]
+\[
+\lim_{x\to x_0}(f(x)\,g(x))=
+\left(\lim_{x\to x_0}f(x)\right)\left(\lim_{x\to x_0}g(x)\right),
+\]
+\[
+\lim_{x\to x_0}\frac{f(x)}{g(x)}=
+\frac{\lim_{x\to x_0}f(x)}{\lim_{x\to x_0}g(x)}
+\quad\text{ако } \lim_{x\to x_0}g(x)\neq 0.
+\]
+
+\subsection{Ключови стандартни граници}
+Тези предели стоят в основата на производните на $\sin x$, $e^x$ и $\ln(1+x)$:
+\[
+\lim_{x\to 0}\frac{\sin x}{x}=1,\qquad
+\lim_{x\to 0}\frac{e^x-1}{x}=1,\qquad
+\lim_{x\to 0}\frac{\ln(1+x)}{x}=1.
+\]
+
+\section{Производни: дефиниция, таблица и правила}
+\subsection{Дефиниция}
+Производната на $f$ в точка $x_0$ се дефинира като граница:
+\[
+f'(x_0)=\lim_{h\to 0}\frac{f(x_0+h)-f(x_0)}{h},
+\]
+ако границата съществува. Интуитивно: $f'(x_0)$ е наклонът на допирателната към графиката в точката.
+
+\subsection{Две основни таблици (както на слайда)}
+\noindent
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\textbf{Таблица за производни}
+
+\vspace{0.3\baselineskip}
+\small
+\begin{tabular}{|l|l|}
+\hline
+Функция $f(x)$ & Производна $f'(x)$ \\
+\hline
+$c$ (константа) & $0$ \\
+\hline
+$x^n$ ($n$ константа) & $n x^{n-1}$ \\
+\hline
+$\sqrt{x}$ & $\dfrac{1}{2\sqrt{x}}$ \\
+\hline
+$\dfrac{1}{x}$ & $-\dfrac{1}{x^2}$ \\
+\hline
+$\sin x$ & $\cos x$ \\
+\hline
+$\cos x$ & $-\sin x$ \\
+\hline
+$\tan x$ & $\dfrac{1}{\cos^2 x}$ \\
+\hline
+$\ln x$ & $\dfrac{1}{x}$ \\
+\hline
+$e^x$ & $e^x$ \\
+\hline
+$a^x$ ($a>0, a\neq 1$) & $a^x\ln a$ \\
+\hline
+$\log_a x$ ($a>0,a\neq 1$) & $\dfrac{1}{x\ln a}$ \\
+\hline
+\end{tabular}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\textbf{Правила за диференциране}
+
+\vspace{0.3\baselineskip}
+\small
+\begin{tabular}{|l|l|}
+\hline
+Правило & Формула \\
+\hline
+Константен множител & $(c f(x))' = c f'(x)$ \\
+\hline
+Сума и разлика & $(f \pm g)' = f' \pm g'$ \\
+\hline
+Произведение & $(fg)' = f'g + fg'$ \\
+\hline
+Частно & $\left(\dfrac{f}{g}\right)' = \dfrac{f'g - fg'}{g^2}\quad (g\neq 0)$ \\
+\hline
+Верижно правило & $(f(g(x)))' = f'(g(x))\cdot g'(x)$ \\
+\hline
+\end{tabular}
+\end{minipage}
+
+\subsection{Верижно правило (chain rule) — защо е толкова важно}
+В машинното обучение почти всяка функция е композиция:
+\[
+\text{loss}(\theta) = \ell\big(\underbrace{g(\theta)}_{\text{модел}}\big),
+\]
+затова \textbf{chain rule} е „механизмът“ зад backpropagation.
+
+\paragraph{Пример.}
+Нека $y = \ln(3x-1)$. Това е композиция: вътрешна функция $u(x)=3x-1$ и външна $f(u)=\ln u$.
+Тогава:
+\[
+y' = \frac{1}{u(x)}\cdot u'(x)=\frac{1}{3x-1}\cdot 3=\frac{3}{3x-1}.
+\]
+
+\section{Експонента и специалната основа $e$}
+\subsection{Експоненциална функция}
+За $a>0$ и $a\neq 1$ дефинираме $f(x)=a^x$. Полезни правила за степени:
+\[
+a^{x+y}=a^x a^y,\qquad
+a^{x-y}=\frac{a^x}{a^y},\qquad
+(a^x)^y=a^{xy}.
+\]
+
+\subsection{Откъде идва $e$ (идея за непрекъснато олихвяване)}
+Класическият начин да се “роди” $e$ е пределът:
+\[
+e=\lim_{n\to\infty}\left(1+\frac{1}{n}\right)^n \approx 2.71828\ldots
+\]
+Тази основа е специална, защото има уникалното свойство:
+\[
+\frac{d}{dx}e^x=e^x.
+\]
+
+\subsection{Производна на $a^x$}
+Често се ползва представянето $a^x=e^{x\ln a}$, което дава:
+\[
+\frac{d}{dx}a^x=\frac{d}{dx}e^{x\ln a}=e^{x\ln a}\cdot \ln a = a^x\ln a.
+\]
+
+\section{Логаритми: дефиниция, инверсия и правила}
+\subsection{Дефиниция и връзка с експонентата}
+За $a>0$, $a\neq 1$ и $x>0$:
+\[
+\log_a x = y \quad\Longleftrightarrow\quad a^y=x.
+\]
+Естественият логаритъм е $\ln x=\log_e x$.
+
+\subsection{“Оцветени” инверсни тъждества (за по-лесно запомняне)}
+С използване на макросите по-горе:
+\[
+\invexp{a}{x}
+\qquad\text{и}\qquad
+\invlog{a}{x}.
+\]
+Тоест (в разписан вид):
+\[
+\textcolor{BaseRed}{a}^{\log_{\textcolor{BaseRed}{a}}\!\left(\textcolor{ArgGreen}{x}\right)}=\textcolor{ArgGreen}{x},
+\qquad
+\log_{\textcolor{BaseRed}{a}}\!\left(\textcolor{BaseRed}{a}^{x}\right)=x.
+\]
+
+\subsection{Таблица: правила за логаритми}
+\begin{center}
+\textbf{Правила за логаритми (за $x>0$, $y>0$, $a>0$, $a\neq 1$)}
+\vspace{0.3\baselineskip}
+
+\small
+\begin{tabular}{|p{0.36\textwidth}|p{0.56\textwidth}|}
+\hline
+\textbf{Правило} & \textbf{Формула} \\
+\hline
+Произведение & $\log_a(xy)=\log_a x+\log_a y$ \\
+\hline
+Частно & $\log_a\!\left(\dfrac{x}{y}\right)=\log_a x-\log_a y$ \\
+\hline
+Степен (показател отпред) & $\log_a(x^r)=r\,\log_a x\quad (r\in\mathbb{R})$ \\
+\hline
+Смяна на основата & $\displaystyle \log_a x=\frac{\ln x}{\ln a}$ \\
+\hline
+Инверсия I & $a^{\log_a x}=x$ \\
+\hline
+Инверсия II & $\log_a(a^x)=x$ \\
+\hline
+Логаритъм от 1 & $\log_a 1 = 0$ \\
+\hline
+Логаритъм от основата & $\log_a a = 1$ \\
+\hline
+Монотонност (важно за неравенства) & ако $a>1$ — $\log_a x$ е растяща; ако $0<a<1$ — намаляваща \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Производни на логаритми}
+Ключов резултат:
+\[
+\frac{d}{dx}\ln x=\frac{1}{x}\quad (x>0).
+\]
+От смяна на основата $\log_a x=\dfrac{\ln x}{\ln a}$ следва:
+\[
+\frac{d}{dx}\log_a x=\frac{1}{x\ln a}\quad (x>0).
+\]
+
+\section{Мини-примери (типични в ML контекст)}
+\subsection{Лог-вероятност и производна}
+Нека $L(x)= -\ln(x)$ (напр. негативен лог-вероятностен член). Тогава:
+\[
+L'(x) = -\frac{1}{x},
+\]
+което показва защо при много малки вероятности градиентите могат да станат големи по абсолютна стойност.
+
+\subsection{Експонента в композиция}
+Ако $y=e^{3x}$, то по chain rule:
+\[
+y' = e^{3x}\cdot 3 = 3e^{3x}.
+\]
+
+\end{document}
